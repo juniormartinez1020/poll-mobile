@@ -1,19 +1,46 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack } from 'expo-router';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+
+
+const polls = [1, 2, 3]
 
 export default function HomeScreen() {
   return (
-    <View>
-     <Text style={styles.container}>
-      welcome to my app polls lets go ✔❤🐱‍🚀🧤
-      </Text>
-    </View>
+    <>
+    <Stack.Screen 
+    options={{ title: 'Polls'}}
+    />
+      <FlatList
+      data={polls}
+      contentContainerStyle={styles.container}
+      renderItem={() => (
+       <View style={styles.pollQuestion}>
+         <Text
+         style={styles.pollTxt}
+         >
+          Poll Question ❓
+          </Text>
+       </View>
+      )}
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flex: 1,
+    padding: 10,
+    gap: 5
   },
+  pollQuestion: {
+    backgroundColor: 'whitesmoke',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10
+  },
+  pollTxt: {
+    fontWeight: 'bold',
+    fontSize: 15
+  }
 });
