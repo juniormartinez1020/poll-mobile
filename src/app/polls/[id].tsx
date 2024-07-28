@@ -1,24 +1,47 @@
 import { Stack, useLocalSearchParams } from "expo-router";
-import { Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Button, Pressable, StyleSheet, Text, View } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Poll } from "@/src/types/db";
+import { supabase } from "@/src/lib/supabase";
 
-const poll = {
-    question: 'Vue JS vs React Vite?',
-    options: [
-        'Vue JS',
-        'React Vite',
-        'Next JS'
-    ]
-}
+// const poll = {
+//     options: ["Option 1", "Option 2", "Option 3"] // Ejemplo de inicialización correcta
+// };
 
 export default function PollDetails() {
-    const { id } = useLocalSearchParams<{ id: String }>()
+    const { id } = useLocalSearchParams<{ id: string }>()
+    const [poll, setPoll] = useState<Poll>(null)
 
-    const [select, setSelect] = useState('Vue JS')
+    const [select, setSelect] = useState('')
+
+    
+  useEffect(() => {
+    const fetchPolls = async () => {
+      console.log('fetching...')
+
+      
+   let { data, error } = await supabase
+    .from('polls')
+     .select('*')
+     .eq('id', Number.parseInt(id))
+     .single()
+
+     if (error) {
+      Alert.alert('error fetch data.')
+     }
+     setPoll(data)
+    }
+    fetchPolls()
+  }, [])
+  
 
     const choose = () => {
         console.warn('choose ', select)
+    }
+
+    if (!poll) {
+        return <ActivityIndicator />
     }
    
     return (
@@ -32,25 +55,20 @@ export default function PollDetails() {
 
 
           <View style={{ gap: 5 }}>
-            {poll.options.map((option) => (
-                <Pressable 
-                onPress={() => setSelect(option)}
-                key={option} 
-                style={styles.optContainer}
-                >
-                    <AntDesign name={
-                        option === select ? "checkcircleo" : "circledown"
-                        } 
-                        size={16} 
-                        color={
-                            option === select ? 'green' : 'gray'
-                        }
-                        />
-                    <Text>
-                        {option}
-                    </Text>
-                </Pressable>
-            ))}
+          {Array.isArray(poll.options) && poll.options.map((option) => (
+      <Pressable
+        onPress={() => setSelect(option)}
+        key={option}
+        style={styles.optContainer}
+      >
+        <AntDesign
+          name={option === select ? "checkcircleo" : "circledown"}
+          size={16}
+          color={option === select ? 'green' : 'gray'}
+        />
+        <Text>{option}</Text>
+      </Pressable>
+       ))}
           </View>
 
           <Button 
