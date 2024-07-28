@@ -1,16 +1,26 @@
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
+import { useAuth } from "@/src/providers/AuthProvider";
 
 export default function CreatePoll() {
 
     const [question, setQuestion] = useState('')
     const [options, setOptions] = useState(['', ''])
 
+    
+    const { user } = useAuth()
+
+
     const createPoll = () => {
         console.warn('create')
     }
+
+    if (!user) {
+        return <Redirect href='/login'/>
+    }
+
 
     return (
         <View style={styles.container}>
