@@ -1,19 +1,46 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, router, Stack } from "expo-router";
 import { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import { useAuth } from "@/src/providers/AuthProvider";
+import { supabase } from "@/src/lib/supabase";
 
 export default function CreatePoll() {
 
     const [question, setQuestion] = useState('')
     const [options, setOptions] = useState(['', ''])
+    const [error, setError] = useState('')
 
     
     const { user } = useAuth()
 
 
-    const createPoll = () => {
+    const createPoll = async () => {
+        setError('')
+        if (!question) {
+            setError('please provide the question.')
+            return
+        }
+
+        const validOption = options.filter(o => !!o)
+        if (validOption.length < 2) {
+            setError('please provide or least 2 valid options.')
+            return
+        }
+
+        
+          const { data, error } = await supabase
+          .from('polls')
+          .insert([{ question, options: validOption }])
+          .select()
+          if (error) {
+            Alert.alert('failed to create poll')
+            console.log(error)
+            return
+          }
+          router.back()
+
+        
         console.warn('create')
     }
 
@@ -79,6 +106,10 @@ export default function CreatePoll() {
             onPress={createPoll}
             title="Create poll"
             />
+
+            <Text style={{ color: 'crimson' }}>
+                {error}
+            </Text>
         </View>
     )
 }
