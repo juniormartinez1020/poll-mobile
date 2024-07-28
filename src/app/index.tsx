@@ -34,17 +34,20 @@ export default function HomeScreen() {
     <Stack.Screen 
     options={{ 
       title: 'Polls',
-      // headerRight: () => (
-      //   <Link href={'/polls/new'}>
-      //    <AntDesign name="plussquareo" size={20} color="gray" />
-      //   </Link>
-      // )
-      headerRight: () => 
+      headerRight: () => (
       <AntDesign 
       onPress={() => router.push('/polls/new')}
       name="plussquareo" 
       size={20} color="gray" 
       />
+      ),
+      headerLeft: () => (
+        <AntDesign 
+        onPress={() => router.push('/profile')}
+        name="user" 
+        size={20} color="gray" 
+        />
+      )
       
     }}
     />

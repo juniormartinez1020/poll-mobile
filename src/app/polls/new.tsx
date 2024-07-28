@@ -28,7 +28,10 @@ export default function CreatePoll() {
             <Text style={styles.label}>Options</Text>
             
             {options.map((option, index) => (
-                <View style={{ justifyContent: 'center' }}>
+                <View 
+                key={index}
+                style={{ justifyContent: 'center' }}
+                >
                  <TextInput
                  value={option}
                  onChangeText={(text) => {
