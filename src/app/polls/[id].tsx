@@ -2,25 +2,23 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Alert, Button, Pressable, StyleSheet, Text, View } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import { useEffect, useState } from "react";
-import { Poll } from "@/src/types/db";
+import { Poll, Vote } from "@/src/types/db";
 import { supabase } from "@/src/lib/supabase";
+import { useAuth } from "@/src/providers/AuthProvider";
 
-// const poll = {
-//     options: ["Option 1", "Option 2", "Option 3"] // Ejemplo de inicialización correcta
-// };
 
 export default function PollDetails() {
     const { id } = useLocalSearchParams<{ id: string }>()
     const [poll, setPoll] = useState<Poll>(null)
+    const [userVote, setUserVote] = useState<Vote>(null)
 
-    const [select, setSelect] = useState('')
+    const [select, setSelect] = useState<string>('')
+
+    const { user } = useAuth()
 
     
   useEffect(() => {
-    const fetchPolls = async () => {
-      console.log('fetching...')
-
-      
+    const fetchPolls = async () => {     
    let { data, error } = await supabase
     .from('polls')
      .select('*')
@@ -32,12 +30,52 @@ export default function PollDetails() {
      }
      setPoll(data)
     }
-    fetchPolls()
-  }, [])
+
+    const fetchUserVote = async () => {
+      let { data, error } = await supabase
+      .from('votes')
+       .select('*')
+       .eq('poll_id', Number.parseInt(id))
+       .eq('user_id', user?.id)
+       .limit(1)
+       .single()
+  
+       if (error) {
+        Alert.alert('error fetch user vote.')
+       }
+       setUserVote(data)
+       if (data) {
+        setSelect(data.option)
+       }
+      }
+      fetchPolls()
+      fetchUserVote()
+ }, [])
   
 
-    const choose = () => {
-        console.warn('choose ', select)
+    const choose = async () => {     
+      const newVote = { 
+        option: select,
+        poll_id: poll?.id,
+        user_id: user?.id
+       }
+       if (userVote) {
+        newVote.id = userVote.id
+       }
+         const { data, error } = await supabase
+         .from('votes')
+         .upsert([newVote])
+         .select()
+         .single()
+
+         
+         if (error) {
+          Alert.alert('failed to vote.')
+         } else {
+          setUserVote(data)
+          Alert.alert('thanks for voting.')
+         }
+        
     }
 
     if (!poll) {
